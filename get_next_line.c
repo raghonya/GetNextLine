@@ -100,23 +100,42 @@ char	*get_next_line(int fd)
 	free(line);
 	line = ft_strdup(tmp);
 	free(tmp);
-	tmp = ft_strdup("");
-	if (line == tmp)
+	if (!ft_strchr(ret, '\n'))
 	{
-		free(tmp);
+		// printf ("mtanq if\n");
 		free(line);
+		line = NULL;
 		if (*ret != 0)
 			return (ret);
-		return (NULL);
+		free(ret);
+		// printf("hasanq ste nixuya sebe\n");
+		return (line);
 	}
-	free(tmp);
 	return (ret);
 }
 
 int main()
 {
 	char *s;
-	int fd = open("43_with_nl", O_RDONLY);
+	int fd = open("laboratornaya_krisa.txt", O_RDONLY);
+	s = get_next_line(fd);
+	printf ("%s", s);
+	free(s);
+	s = get_next_line(fd);
+	printf ("%s", s);
+	free(s);
+	s = get_next_line(fd);
+	printf ("%s", s);
+	free(s);
+	s = get_next_line(fd);
+	printf ("%s", s);
+	free(s);
+	s = get_next_line(fd);
+	printf ("%s", s);
+	free(s);
+	s = get_next_line(fd);
+	printf ("%s", s);
+	free(s);
 	s = get_next_line(fd);
 	printf ("%s", s);
 	free(s);
@@ -127,7 +146,7 @@ int main()
 	printf ("%s", s);
 	free(s);
 	printf ("\n");
-	system("leaks a.out");
+	// system("leaks a.out");
 	// s = get_next_line(fd);
 	// printf ("4. '%s'", s);
 	// free(s);
