@@ -1,77 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: raghonya <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/01/29 20:03:43 by raghonya          #+#    #+#             */
+/*   Updated: 2023/01/29 20:03:45 by raghonya         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line.h"
-#include <stdio.h>
-
-size_t	ft_strlen(const char *s)
-{
-	size_t	i;
-
-	i = 0;
-	while (*(s + i))
-		i++;
-	return (i);
-}
-
-char	*ft_strjoin(char const *s1, char const *s2)
-{
-	size_t	i;
-	size_t	k;
-	char	*s;
-
-	i = 0;
-	k = 0;
-	s = malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
-	if (!s)
-		return (NULL);
-	while (i < ft_strlen(s1) + ft_strlen(s2))
-	{
-		if (i < ft_strlen(s1))
-			s[i] = s1[i];
-		else
-			s[i] = s2[k++];
-		i++;
-	}
-	s[i] = 0;
-	return (s);
-}
-
-char	*ft_strdup(const char *s)
-{
-	size_t	i;
-	char	*dup;
-
-	i = 0;
-	dup = malloc((sizeof(char) * (ft_strlen(s) + 1)));
-	if (!dup)
-		return (NULL);
-	while (i < ft_strlen(s))
-	{
-		dup[i] = s[i];
-		i++;
-	}
-	dup[i] = 0;
-	return (dup);
-}
-
-char	*ft_substr(char const *s, unsigned int start, size_t len)
-{
-	size_t	i;
-	char	*str;
-
-	i = 0;
-	if (!s)
-		return (NULL);
-	if (start >= ft_strlen(s))
-		return (ft_strdup(""));
-	if (len > ft_strlen(s) - start)
-		len = ft_strlen(s) - start;
-	str = malloc(sizeof(char) * (len + 1));
-	if (!str)
-		return (NULL);
-	while (i < len)
-		str[i++] = s[start++];
-	str[i] = 0;
-	return (str);
-}
 
 int	ft_strchr(const char *s, int c)
 {
@@ -82,38 +21,63 @@ int	ft_strchr(const char *s, int c)
 	while (1)
 	{
 		if (s[i] == c)
-			return (i);
+			return (1);
 		if (s[i] == 0)
 			return (0);
 		i++;
 	}
 }
 
+char	*ft_substr(char const *s, unsigned int start)
+{
+	size_t	i;
+	size_t	len;
+	char	*str;
+
+	i = 0;
+	len = 0;
+	if (!s)
+		return (NULL);
+	if (!ft_strchr(s, '\n'))
+		len = ft_strlen(s);
+	else
+	{
+		while (s[len] != '\n')
+			len++;
+		len++;
+	}
+	str = malloc(sizeof(char) * (len + 1));
+	if (!str)
+		return (NULL);
+	while (i < len)
+		str[i++] = s[start++];
+	str[len] = 0;
+	return (str);
+}
+
 static char	*read_func(int fd, char *line)
 {
 	char	buf[BUFFER_SIZE + 1];
-	int		read_size, i = 0;
+	char	*tmp;
+	int		read_size;
+
 	while (1)
 	{
-		printf ("%drd loop\n", ++i);
 		read_size = read(fd, buf, BUFFER_SIZE);
 		if (read_size < 0)
 		{
-			// printf ("lineeee === '%s'\n", line);
 			free (line);
 			return (NULL);
 		}
 		buf[read_size] = 0;
 		if (!line)
-		{
-			line = ft_strdup (buf);
-			printf ("dup arac line: '%s'\n\n", line);
-		}
+			tmp = ft_strdup (buf);
 		else
 		{
-			printf ("join arac line: '%s'\n\n", line);
-			line = ft_strjoin (line, buf);
+			tmp = ft_strjoin(line, buf);
+			free(line);
 		}
+		line = tmp;
 		if (ft_strchr(line, '\n') || read_size == 0)
 			break ;
 	}
@@ -131,24 +95,128 @@ char	*get_next_line(int fd)
 	line = read_func(fd, line);
 	if (!line)
 		return (NULL);
-	ret = ft_substr(line, 0, ft_strchr(line, '\n'));
-	tmp = ft_strdup(line + ft_strchr(line, '\n') + 1);
+	ret = ft_substr(line, 0);
+	tmp = ft_strdup(line + (ft_strlen(ret)));
 	free(line);
-	line = tmp;
+	line = ft_strdup(tmp);
+	free(tmp);
+	tmp = ft_strdup("");
+	if (line == tmp)
+	{
+		free(tmp);
+		free(line);
+		if (*ret != 0)
+			return (ret);
+		return (NULL);
+	}
+	free(tmp);
 	return (ret);
 }
 
 int main()
 {
 	char *s;
-	int fd = open("laboratornaya_krisa.txt", O_RDONLY);
+	int fd = open("43_with_nl", O_RDONLY);
 	s = get_next_line(fd);
-	printf ("%s\n", s);
+	printf ("%s", s);
 	free(s);
 	s = get_next_line(fd);
-	// printf ("%s\n", get_next_line(fd));
-	// printf ("%s\n", get_next_line(fd));
-	// printf ("%s\n", get_next_line(fd));
-	// printf ("%s\n", get_next_line(fd));
+	printf ("%s", s);
+	free(s);
+	s = get_next_line(fd);
+	printf ("%s", s);
+	free(s);
+	printf ("\n");
 	system("leaks a.out");
+	// s = get_next_line(fd);
+	// printf ("4. '%s'", s);
+	// free(s);
+	// s = get_next_line(fd);
+	// printf ("5. '%s'", s);
+	// free(s);
+	// s = get_next_line(fd);
+	// printf ("6. '%s'", s);
+	// free(s);
+	// s = get_next_line(fd);
+	// printf ("7. '%s'", s);
+	// free(s);
+	// s = get_next_line(fd);
+	// printf ("8. '%s'\n", s);
+	// free(s);
+	// s = get_next_line(fd);
+	// ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// s = get_next_line(fd);
+	// if (s == NULL)
+	// 	write (1, "(null)\n", 7);
+	// else
+	// 	ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// ft_printf ("%s\n", s);
+	// if (s == NULL)
+	// 	write (1, "(null)\n", 7);
+	// else
+	// 	ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// if (s == NULL)
+	// 	write (1, "(null)\n", 7);
+	// else
+	// 	ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// if (s == NULL)
+	// 	write (1, "(null)\n", 7);
+	// else
+	// 	ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// if (s == NULL)
+	// 	write (1, "(null)\n", 7);
+	// else
+	// 	ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// if (s == NULL)
+	// 	write (1, "(null)\n", 7);
+	// else
+	// 	ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// if (s == NULL)
+	// 	write (1, "(null)\n", 7);
+	// else
+	// 	ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// if (s == NULL)
+	// 	write (1, "(null)\n", 7);
+	// else
+	// 	ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// if (s == NULL)
+	// 	write (1, "(null)\n", 7);
+	// else
+	// 	ft_printf ("%s\n", s);
+	// ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// ft_printf ("%s\n", s);
+	// s = get_next_line(fd);
+	// ft_printf ("%s\n", s);
+	// // s = get_next_line(fd);
+	// ft_printf ("%s\n", s);
+	// free(s);
+	
+	// printf ("%s\n", get_next_line(fd));
+	// printf ("%s\n", get_next_line(fd));
+	// printf ("%s\n", get_next_line(fd));
+	// printf ("%s\n", get_next_line(fd));
 }
