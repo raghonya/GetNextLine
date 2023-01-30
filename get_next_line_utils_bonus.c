@@ -10,22 +10,61 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
-# include <stdlib.h>
-# include <stdio.h>
-# include <unistd.h>
-# include <fcntl.h>
-# include <limits.h>
+#include "get_next_line_bonus.h"
 
-# ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 42
+size_t	ft_strlen(const char *s)
+{
+	size_t	i;
 
-# endif
+	i = 0;
+	while (*(s + i))
+		i++;
+	return (i);
+}
 
-size_t	ft_strlen(const char *s);
-char	*ft_strjoin(char const *s1, char const *s2);
-char	*ft_strdup(const char *s);
-char	*get_next_line(int fd);
+char	*ft_strjoin(char const *s1, char const *s2)
+{
+	size_t	i;
+	size_t	k;
+	size_t	s1len;
+	size_t	s2len;
+	char	*s;
 
-#endif
+	i = 0;
+	k = 0;
+	s1len = ft_strlen(s1);
+	s2len = ft_strlen(s2);
+	s = malloc(s1len + s2len + 1);
+	if (!s)
+		return (NULL);
+	while (i < s1len + s2len)
+	{
+		if (i < s1len)
+			s[i] = s1[i];
+		else
+			s[i] = s2[k++];
+		i++;
+	}
+	s[i] = 0;
+	return (s);
+}
+
+char	*ft_strdup(const char *s)
+{
+	size_t	i;
+	size_t	slen;
+	char	*dup;
+
+	i = 0;
+	slen = ft_strlen(s);
+	dup = malloc((sizeof(char) * (slen + 1)));
+	if (!dup)
+		return (NULL);
+	while (s[i])
+	{
+		dup[i] = s[i];
+		i++;
+	}
+	dup[i] = 0;
+	return (dup);
+}
